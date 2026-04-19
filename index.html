@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>심리데이: 쿨잠 자가진단 (ISI)</title>
+    <style>
+        :root {
+            --primary-color: #1a237e;
+            --secondary-color: #00bcd4;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 { color: var(--primary-color); font-size: 1.5rem; margin-bottom: 5px; }
+        .subtitle { color: #666; font-size: 0.9rem; }
+
+        .lang-switch {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .lang-btn {
+            padding: 5px 12px;
+            border: 1px solid #ddd;
+            border-radius: 15px;
+            background: none;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .lang-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; font-weight: bold; margin-bottom: 5px; }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+
+        .question { margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px dashed #eee; }
+        .question-text { font-weight: 600; margin-bottom: 10px; }
+        
+        .options { display: flex; flex-direction: column; gap: 8px; }
+        .option {
+            padding: 12px;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+        }
+
+        .option:hover { background-color: #f0f7ff; }
+        .option.selected {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        #result-page { display: none; text-align: center; }
+        .score-circle {
+            width: 100px;
+            height: 100px;
+            line-height: 100px;
+            border-radius: 50%;
+            background: var(--secondary-color);
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 20px auto;
+        }
+
+        .interpretation { font-size: 1.2rem; font-weight: bold; margin-bottom: 20px; }
+        .tips { text-align: left; background: #f8f9fa; padding: 15px; border-radius: 10px; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="survey-page">
+        <header>
+            <h1>🌙 쿨잠 자가진단 (ISI)</h1>
+            <p class="subtitle">심리데이: 당신의 숙면을 응원합니다</p>
+        </header>
+
+        <div class="lang-switch">
+            <button class="lang-btn active" onclick="switchLang('ko')">한국어</button>
+            <button class="lang-btn" onclick="switchLang('en')">English</button>
+            <button class="lang-btn" onclick="switchLang('vn')">Tiếng Việt</button>
+        </div>
+
+        <div class="input-group">
+            <label id="label-id">학번 (Student ID / Mã số SV)</label>
+            <input type="text" id="student-id" placeholder="Ex) 20260001">
+        </div>
+
+        <div id="questions-container"></div>
+
+        <button class="submit-btn" onclick="calculateResult()" id="btn-submit">결과 확인하기</button>
+    </div>
+
+    <div id="result-page">
+        <h2 id="res-title">검사 결과</h2>
+        <div class="score-circle" id="score-display">0</div>
+        <p class="interpretation" id="res-interpret"></p>
+        <div class="tips" id="res-tips"></div>
+        <button class="submit-btn" onclick="location.reload()" style="background:#666;">다시 하기</button>
+    </div>
+</div>
+
+<script>
+    const translations = {
+        ko: {
+            questions: [
+                "잠들기가 어렵다.", "자다가 자꾸 깬다.", "너무 일찍 깨서 다시 잠들기 어렵다.",
+                "현재 수면 패턴에 만족하는가?", "수면 문제가 일상을 얼마나 방해하는가?",
+                "주변에서 당신의 수면 문제를 눈치채는가?", "현재 수면 문제로 얼마나 스트레스를 받는가?"
+            ],
+            options: ["전혀 없음", "가벼움", "보통", "심함", "매우 심함"],
+            results: ["정상", "가벼운 불면증", "중등도 불면증", "심한 불면증"],
+            tips: "📍 K102호 상담실에서 '쿨잠 꾸러미'를 수령하세요!"
+        },
+        en: {
+            questions: [
+                "Difficulty falling asleep", "Difficulty staying asleep", "Waking up too early",
+                "Satisfaction with sleep pattern", "Interference with daily functioning",
+                "Noticeability to others", "Worry/distress about sleep"
+            ],
+            options: ["None", "Mild", "Moderate", "Severe", "Very Severe"],
+            results: ["Normal", "Mild Insomnia", "Moderate Insomnia", "Severe Insomnia"],
+            tips: "📍 Visit K102 to receive your 'Cool Sleep Kit'!"
+        },
+        vn: {
+            questions: [
+                "Khó đi vào giấc ngủ", "Hay bị thức giấc giữa đêm", "Thức dậy quá sớm",
+                "Mức độ hài lòng với giấc ngủ", "Ảnh hưởng đến sinh hoạt",
+                "Người khác có nhận thấy không?", "Mức độ lo lắng về giấc ngủ"
+            ],
+            options: ["Không", "Nhẹ", "Trung bình", "Nặng", "Rất nặng"],
+            results: ["Bình thường", "Mất ngủ nhẹ", "Mất ngủ trung bình", "Mất ngủ nghiêm trọng"],
+            tips: "📍 Hãy đến phòng K102 để nhận 'Bộ quà ngủ ngon' nhé!"
+        }
+    };
+
+    let currentLang = 'ko';
+    let answers = new Array(7).fill(null);
+
+    function renderQuestions() {
+        const container = document.getElementById('questions-container');
+        container.innerHTML = '';
+        translations[currentLang].questions.forEach((q, qIdx) => {
+            const qDiv = document.createElement('div');
+            qDiv.className = 'question';
+            qDiv.innerHTML = `<div class="question-text">${qIdx + 1}. ${q}</div>`;
+            
+            const optDiv = document.createElement('div');
+            optDiv.className = 'options';
+            
+            translations[currentLang].options.forEach((opt, oIdx) => {
+                const optBtn = document.createElement('div');
+                optBtn.className = `option ${answers[qIdx] === oIdx ? 'selected' : ''}`;
+                optBtn.innerText = opt;
+                optBtn.onclick = () => {
+                    answers[qIdx] = oIdx;
+                    renderQuestions();
+                };
+                optDiv.appendChild(optBtn);
+            });
+            qDiv.appendChild(optDiv);
+            container.appendChild(qDiv);
+        });
+    }
+
+    function switchLang(lang) {
+        currentLang = lang;
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.innerText.toLowerCase().includes(lang === 'ko' ? '한국어' : lang === 'en' ? 'english' : 'tiếng'));
+        });
+        renderQuestions();
+    }
+
+    function calculateResult() {
+        if (answers.includes(null)) {
+            alert(currentLang === 'ko' ? "모든 문항에 답변해주세요." : "Please answer all questions.");
+            return;
+        }
+        
+        const totalScore = answers.reduce((a, b) => a + b, 0);
+        document.getElementById('survey-page').style.display = 'none';
+        document.getElementById('result-page').style.display = 'block';
+        document.getElementById('score-display').innerText = totalScore;
+
+        let resIdx = 0;
+        if (totalScore <= 7) resIdx = 0;
+        else if (totalScore <= 14) resIdx = 1;
+        else if (totalScore <= 21) resIdx = 2;
+        else resIdx = 3;
+
+        document.getElementById('res-interpret').innerText = translations[currentLang].results[resIdx];
+        document.getElementById('res-tips').innerText = translations[currentLang].tips;
+
+        // 데이터 전송 로직 (Apps Script 연동 시 아래 주석 해제)
+        // sendDataToSheet(totalScore);
+    }
+
+    renderQuestions();
+</script>
+</body>
+</html>
