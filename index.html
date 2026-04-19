@@ -40,6 +40,7 @@
 
     function renderQuestions() {
         const container = document.getElementById('questions-container');
+        if(!container) return;
         container.innerHTML = '';
         translations[currentLang].questions.forEach((q, qIdx) => {
             const qDiv = document.createElement('div');
@@ -72,19 +73,14 @@
         renderQuestions();
     }
 
-    // 결과 계산 함수
     function calculateResult() {
         const studentId = document.getElementById('student-id').value.trim();
-        
-        // 유효성 검사: 학번 미입력 또는 미답변 문항 체크
         if (!studentId || answers.includes(null)) {
             alert(translations[currentLang].alert);
             return;
         }
         
         const totalScore = answers.reduce((a, b) => a + b, 0);
-        
-        // 화면 전환
         document.getElementById('survey-page').style.display = 'none';
         document.getElementById('result-page').style.display = 'block';
         document.getElementById('score-display').innerText = totalScore;
@@ -98,14 +94,12 @@
         document.getElementById('res-interpret').innerText = translations[currentLang].results[resIdx];
         document.getElementById('res-tips').innerText = translations[currentLang].tips;
 
-        // 데이터 전송 실행
         sendDataToSheet(totalScore, studentId);
     }
 
-    // 데이터 전송 함수 (분리하여 선언)
     async function sendDataToSheet(score, studentId) {
-        // 주의: 반드시 본인의 Apps Script 웹 앱 URL로 교체하세요!
-        const scriptUrl = https://script.google.com/macros/s/AKfycby64z5hg6p5hMEXxoh_M4MUjDZMiBKH-QZE-7mqNjv-RGmUa4S8_kj0mZTe4lTD6-GupA/exec;
+        // 따옴표를 추가하여 문자열로 올바르게 수정했습니다.
+        const scriptUrl = 'https://script.google.com/macros/s/AKfycby64z5hg6p5hMEXxoh_M4MUjDZMiBKH-QZE-7mqNjv-RGmUa4S8_kj0mZTe4lTD6-GupA/exec';
         
         const data = {
             studentId: studentId,
@@ -114,7 +108,6 @@
         };
 
         try {
-            // mode: 'no-cors'는 응답을 읽을 수는 없지만 전송은 성공합니다.
             await fetch(scriptUrl, {
                 method: 'POST',
                 mode: 'no-cors',
@@ -127,5 +120,6 @@
         }
     }
 
-    renderQuestions();
+    // 문서가 로드된 후 실행되도록 보장
+    window.onload = renderQuestions;
 </script>
