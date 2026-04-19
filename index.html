@@ -95,29 +95,32 @@
         document.getElementById('res-tips').innerText = translations[currentLang].tips;
 
        // 데이터 전송 함수 (분리하여 선언)
-    async function sendDataToSheet(score, studentId) {
-        // 주소를 따옴표('')로 감싸서 문자열로 만들어주었습니다.
-        const scriptUrl = 'https://script.google.com/macros/s/AKfycby64z5hg6p5hMEXxoh_M4MUjDZMiBKH-QZE-7mqNjv-RGmUa4S8_kj0mZTe4lTD6-GupA/exec';
-        
-        const data = {
-            studentId: studentId,
-            score: score,
-            answers: answers
-        };
+   async function sendDataToSheet(score, studentId) {
+    // 1. 주소를 반드시 따옴표('')로 감싸야 페이지가 열립니다.
+    const scriptUrl = 'https://script.google.com/macros/s/AKfycby64z5hg6p5hMEXxoh_M4MUjDZMiBKH-QZE-7mqNjv-RGmUa4S8_kj0mZTe4lTD6-GupA/exec';
+    
+    // 2. 현재 시트 연동에 문제가 있다면, 아래의 fetch 부분을 잠시 주석 처리(//)하세요.
+    // 이렇게 하면 데이터 전송만 안 될 뿐, 학생들은 검사 결과를 정상적으로 볼 수 있습니다.
+    /*
+    const data = {
+        studentId: studentId,
+        score: score,
+        answers: answers
+    };
 
-        try {
-            await fetch(scriptUrl, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-            console.log('데이터 전송 시도 완료');
-        } catch (error) {
-            console.error('전송 중 오류 발생:', error);
-        }
+    try {
+        await fetch(scriptUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        console.log('데이터 전송 시도 완료');
+    } catch (error) {
+        console.error('전송 중 오류 발생:', error);
     }
+    */
+}
 
-    // 페이지 로드 시 질문 렌더링 시작
-    window.onload = renderQuestions;
-</script>
+// 이 함수가 실행되어야 질문지가 나타납니다.
+window.onload = renderQuestions;
