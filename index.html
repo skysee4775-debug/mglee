@@ -94,11 +94,9 @@
         document.getElementById('res-interpret').innerText = translations[currentLang].results[resIdx];
         document.getElementById('res-tips').innerText = translations[currentLang].tips;
 
-        sendDataToSheet(totalScore, studentId);
-    }
-
+       // 데이터 전송 함수 (분리하여 선언)
     async function sendDataToSheet(score, studentId) {
-        // 따옴표를 추가하여 문자열로 올바르게 수정했습니다.
+        // 주소를 따옴표('')로 감싸서 문자열로 만들어주었습니다.
         const scriptUrl = 'https://script.google.com/macros/s/AKfycby64z5hg6p5hMEXxoh_M4MUjDZMiBKH-QZE-7mqNjv-RGmUa4S8_kj0mZTe4lTD6-GupA/exec';
         
         const data = {
@@ -120,6 +118,6 @@
         }
     }
 
-    // 문서가 로드된 후 실행되도록 보장
+    // 페이지 로드 시 질문 렌더링 시작
     window.onload = renderQuestions;
 </script>
